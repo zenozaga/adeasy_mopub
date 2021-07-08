@@ -1,4 +1,5 @@
 import 'package:adeasy_mopub/adeasy_mopub.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -28,7 +29,8 @@ class _AdEasyMopubWidgetState extends State<AdEasyMopubWidget> {
 
   static const String REWARD_UNIT_ID = "920b6145fb1546cf8b5cf2ac34638bb7";
   static const String INTERSTITIAL_UNIT_ID = "24534e1901884e398f1253216226017e";
-  static const String BANNER_UNIT_ID = "252412d5e9364a05ab77d9396346d73d";
+  static const String BANNER_UNIT_ID = "b195f8dd8ded45fe847ad89ed1d016da";
+  static const String BANNER_RECTANGLE_UNIT_ID = "252412d5e9364a05ab77d9396346d73d";
 
   bool ready = false;
   bool rewardLoaded = false;
@@ -36,7 +38,8 @@ class _AdEasyMopubWidgetState extends State<AdEasyMopubWidget> {
   bool offerWallLoaded = false;
   bool showBanner = false;
 
-  AdEasyBannerSize bannerSize = AdEasyBannerSize.RECTANGLE;
+  AdEasyBannerSize bannerSize = AdEasyBannerSize.BANNER;
+  AdEasyBannerSize bannerSizeRectangle = AdEasyBannerSize.RECTANGLE;
   late Size size;
 
   ////
@@ -167,6 +170,7 @@ class _AdEasyMopubWidgetState extends State<AdEasyMopubWidget> {
 
   }
 
+
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
@@ -233,31 +237,29 @@ class _AdEasyMopubWidgetState extends State<AdEasyMopubWidget> {
               width: size.width,
               child: Column(
                 children: [
-                  if (showBanner)
-                    Container(
-                      width: bannerSize.width.toDouble(),
-                      height: bannerSize.height.toDouble(),
+                  Container(
+                      width: bannerSizeRectangle.width.toDouble(),
+                      height: bannerSizeRectangle.height.toDouble(),
                       color: Colors.grey,
                       child: AdEasyBannerAd(
-                        unitID: BANNER_UNIT_ID,
-                        size: bannerSize,
+                        unitID: BANNER_RECTANGLE_UNIT_ID,
+                        size: bannerSizeRectangle,
                       ),
                     ),
                   SizedBox(
                     height: size.height * .05,
                   ),
-
-                  ListTile(
-                    tileColor:  Color(0xFFd1d1d1),
-                    title: Text("Banner Ad".toUpperCase()),
-                    trailing: ElevatedButton(
-                      child: Text(showBanner ? "Hide" : "Show"),
-                      onPressed: () {
-                        setState(() {
-                          showBanner = showBanner ? false : true;
-                        });
-                      },
+                  Container(
+                    width: bannerSize.width.toDouble(),
+                    height: bannerSize.height.toDouble(),
+                    color: Colors.grey,
+                    child: AdEasyBannerAd(
+                      unitID: BANNER_UNIT_ID,
+                      size: bannerSize,
                     ),
+                  ),
+                   SizedBox(
+                    height: size.height * .05,
                   )
                 ],
               ),

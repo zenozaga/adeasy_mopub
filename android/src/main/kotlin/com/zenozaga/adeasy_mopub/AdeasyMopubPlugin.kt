@@ -128,8 +128,6 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       mInterstitial?.interstitialAdListener = (object : Listener(){
         override fun onLoad() {
 
-          Log.d(TAG,"Load > Reward ($unitID)" )
-
           sendEvent(Constants.EVENT_LOAD,Constants.AD_TYPE_INERSTITIAL,"")
           result.success(true)
           mInterstitial?.interstitialAdListener = null;
@@ -379,7 +377,7 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     message.put("type", type)
 
 
-    Log.d(TAG, "Event: $event   Error: $errorMessage");
+    Log.d(TAG, "event > $event \n error > $errorMessage");
 
     if(event != null) activity?.runOnUiThread{
       channel.invokeMethod(event, message.map())
