@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import MoPub
+import MoPubSDK
 
 public class AdEasyListener: NSObject ,MPInterstitialAdControllerDelegate, MPRewardedVideoDelegate   {
     

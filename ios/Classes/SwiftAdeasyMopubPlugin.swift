@@ -1,6 +1,6 @@
 import Flutter
 import UIKit
-import MoPub
+import MoPubSDK
 
 public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
     
@@ -9,6 +9,7 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
     private let TAG:String = "AdeasyMoPub > "
     private var interstialManager:AdEasyInterstitial!
     private var rewardManager:AdEasyRewardAd!
+    private var viewController:UIViewController?
 
     fileprivate var delegate: AdEasyListener?
 
@@ -18,6 +19,8 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
         self.channel = channel;
         self.interstialManager = AdEasyInterstitial(channel: channel);
         self.rewardManager = AdEasyRewardAd(channel: channel)
+        self.viewController =  UIApplication.shared.keyWindow?.rootViewController
+
     
     }
     
@@ -35,7 +38,34 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
  
   }
     
+    func consentStatus() -> String {
+        
+        switch MoPub.sharedInstance().currentConsentStatus {
+        case  MPConsentStatus.consented:
+            return "granted"
+        case  MPConsentStatus.denied:
+            return "denied"
+        case  MPConsentStatus.potentialWhitelist:
+            return "potentialWhitelist"
+        case  MPConsentStatus.doNotTrack:
+            return "doNotTrack"
+        default:
+            return "unknow"
+        }
+        
+    }
+    
 
+    func consent(enabled:Bool!){
+        
+        let isGranted = MoPub.sharedInstance().currentConsentStatus == MPConsentStatus.consented;
+        let doNotAsk = MoPub.sharedInstance().currentConsentStatus == MPConsentStatus.doNotTrack;
+        let unknow = MoPub.sharedInstance().currentConsentStatus == MPConsentStatus.unknown;
+
+        
+        print("\(self.TAG) no muestre nah \(consentStatus()) \(isGranted) \(MoPub.sharedInstance().isGDPRApplicable) \(MoPub.sharedInstance().shouldShowConsentDialog)")
+        
+    }
     
     func initialization(call: FlutterMethodCall, result: @escaping FlutterResult){
 
@@ -46,132 +76,26 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
         let adConsent:Bool = args["adConsent"] as? Bool ?? false
         let adUnitID:String = args["adUnitID"] as? String ?? ""
 
+
+       
         let sdkConfig = MPMoPubConfiguration(adUnitIdForAppInitialization: adUnitID )
                sdkConfig.loggingLevel = testMode ? .debug : .none
                
                MoPub.sharedInstance().initializeSdk(with: sdkConfig) {
+                
+                if(adConsent){
+                    self.consent(enabled: true)
+                }
+                
                 result(true)
+               
                }
 
 
     }
 
     
-    
-    func loadReward(call: FlutterMethodCall, result: @escaping FlutterResult){
-        
-        let args = call.arguments as? [String : Any] ?? [:]
-        let adUnitID:String = args["unitID"] as? String ?? ""
-        
-        if(MPRewardedVideo.hasAdAvailable(forAdUnitID: adUnitID)){
-            
-            self.sendEvent(event: Constants.EVENT_LOAD,type: Constants.AD_TYPE_REWARD,error: nil,data: nil)
-            result(true)
-            
-        }else{
-            self.delegate = AdEasyListener(
-                
-                onLoad:{
-                    
-                    self.sendEvent(event: Constants.EVENT_LOAD,type: Constants.AD_TYPE_REWARD, error: nil, data: nil)
-                    result(true)
-                    
-                    MPRewardedVideo.removeDelegate(forAdUnitId: adUnitID)
-
-                    
-                },onFail: { (error:Error?) in
-                    
-                    self.sendEvent(event: Constants.EVENT_FAIL,type: Constants.AD_TYPE_REWARD,error: error,data: nil)
-
-                    result(FlutterError(
-                        code: "0000", message: error?.localizedDescription.description, details: ""
-                    ))
-                    
-                    MPRewardedVideo.removeDelegate(forAdUnitId: adUnitID)
-
-                    
-                }
-            );
-            MPRewardedVideo.setDelegate( self.delegate, forAdUnitId: adUnitID)
-            
-            MPRewardedVideo.loadAd(withAdUnitID: adUnitID, withMediationSettings: nil)
-        }
-        
-    
-    }
-    
-    func showReward(call: FlutterMethodCall, result: @escaping FlutterResult){
-        
-        let args = call.arguments as? [String : Any] ?? [:]
-        let adUnitID:String = args["unitID"] as? String ?? ""
-        
-        if(MPRewardedVideo.hasAdAvailable(forAdUnitID: adUnitID)){
  
-            
- 
-            self.delegate = AdEasyListener(
-                onOpen: {
-                    
-
-                    self.sendEvent(event: Constants.EVENT_OPEN, type: Constants.AD_TYPE_REWARD,error: nil,data: nil)
-                    result(true)
-
-                    
-                    
-                }, onFail: { (error:Error?) in
-                    
-                    self.sendEvent(event: Constants.EVENT_FAIL, type: Constants.AD_TYPE_REWARD,error: error,data: nil)
-
-                    result(FlutterError(
-                        code: "0000", message: error?.localizedDescription.description, details: ""
-                    ))
-                    
-                
-                    MPRewardedVideo.removeDelegate(forAdUnitId: adUnitID)
-
-                },
-                onClose: {
-                    
-                    self.sendEvent(event: Constants.EVENT_CLOSE, type: Constants.AD_TYPE_REWARD,error: nil,data: self.delegate?.getData())
-                    MPRewardedVideo.removeDelegate(forAdUnitId: adUnitID)
-
-                },
-                onClicked: {
-
-                    self.sendEvent(event: Constants.EVENT_CLICK, type: Constants.AD_TYPE_REWARD,error: nil,data: nil)
-
-                },onReward: {
-                    print("REWARDDDDDDDDDDDDDDDDDDDD")
-                    self.sendEvent(event: Constants.EVENT_CLOSE, type: Constants.AD_TYPE_REWARD,error: nil,data: self.delegate?.getData())
-                    
-                },
-                onLeave: {
-                    self.sendEvent(event: Constants.EVENT_LEAVE, type: Constants.AD_TYPE_REWARD,error: nil,data: nil)
-
-                }
-                
-            );
-            
-            MPRewardedVideo.setDelegate(self.delegate, forAdUnitId: adUnitID)
-            
-            
-            let reward = MPRewardedVideo.selectedReward(forAdUnitID: adUnitID)
-            let rootViewController = UIApplication.shared.keyWindow?.rootViewController
-            MPRewardedVideo.presentAd(forAdUnitID: adUnitID, from: rootViewController, with: reward)
-                    
-            
-        }else{
-            
-            self.sendEvent(event: Constants.EVENT_FAIL, type: Constants.AD_TYPE_REWARD,error: nil,data: nil)
-
-            result(FlutterError(
-                code: "0000", message: "\(Constants.AD_TYPE_REWARD) is not Loaded", details: ""
-            ))
-            
-            
-        }
-        
-    }
     
     func sendEvent(event:String, type:String?, error:Error?, data:Any?){
         

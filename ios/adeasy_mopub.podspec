@@ -15,10 +15,10 @@ A new flutter plugin project.
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  
-  s.platform = :ios, '9.0'
-  s.dependency 'mopub-ios-sdk'
-  s.ios.deployment_target = '9.0'
+
+  s.platform = :ios, '10.0'
+  s.dependency 'mopub-ios-sdk' , '5.16.1'
+  s.ios.deployment_target = '10.0'
   s.static_framework = true
   
   # Flutter.framework does not contain a i386 slice.

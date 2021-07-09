@@ -9,7 +9,7 @@
 //
 
 import Foundation
-import MoPub
+import MoPubSDK
 
 class AdEasyRewardAd: NSObject {
   
