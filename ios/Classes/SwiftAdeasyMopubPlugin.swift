@@ -1,6 +1,8 @@
 import Flutter
 import UIKit
 import MoPubSDK
+import AppTrackingTransparency
+import AdSupport
 
 public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
     
@@ -40,31 +42,95 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
     
     func consentStatus() -> String {
         
-        switch MoPub.sharedInstance().currentConsentStatus {
-        case  MPConsentStatus.consented:
-            return "granted"
-        case  MPConsentStatus.denied:
-            return "denied"
-        case  MPConsentStatus.potentialWhitelist:
-            return "potentialWhitelist"
-        case  MPConsentStatus.doNotTrack:
-            return "doNotTrack"
-        default:
-            return "unknow"
+        if #available(iOS 14, *) {
+        
+            let status = ATTrackingManager.trackingAuthorizationStatus;
+            
+            
+            switch status {
+            case ATTrackingManager.AuthorizationStatus.authorized:
+                return "granted"
+            case ATTrackingManager.AuthorizationStatus.denied:
+                return "denied"
+            case ATTrackingManager.AuthorizationStatus.notDetermined:
+                return "notDetermined"
+            case ATTrackingManager.AuthorizationStatus.restricted:
+                return "restricted"
+            @unknown default:
+                return "unknown"
+            }
+            
+           
+        }else{
+            
+            return "granted";
+            
         }
+ 
         
     }
+ 
     
-
-    func consent(enabled:Bool!){
+    func setConsent(call: FlutterMethodCall, result: @escaping FlutterResult, withResult:Bool! = true){
+  
+            
+        if #available(iOS 14, *) {
         
-        let isGranted = MoPub.sharedInstance().currentConsentStatus == MPConsentStatus.consented;
-        let doNotAsk = MoPub.sharedInstance().currentConsentStatus == MPConsentStatus.doNotTrack;
-        let unknow = MoPub.sharedInstance().currentConsentStatus == MPConsentStatus.unknown;
+            let state = ATTrackingManager.trackingAuthorizationStatus;
+            
+            print("\(TAG) > status > \(state == .notDetermined)")
 
+            if(state == .notDetermined){
+                
+                ATTrackingManager.requestTrackingAuthorization { status in
+                    switch status {
+                    case .authorized:
+                        
+                        MoPub.sharedInstance().grantConsent()
+                        if(withResult) {
+                            result(true);
+                        }
+                        break;
+                    
+                    default:
+                        if(withResult){
+                            result(false)
+                        }
+                    }
+                }
+                
+            }else if(state == .authorized){
+                
+                MoPub.sharedInstance().grantConsent()
+                if(withResult){
+                    result(true)
+                }
+            }else if(state == .denied || state == .restricted){
+                
+                MoPub.sharedInstance().revokeConsent()
+                
+                if(withResult){
+                
+                    result(false)
+                }
+                
+            }
+            
+           
         
-        MoPub.sharedInstance().grantConsent()
-        print("\(self.TAG) no muestre nah \(consentStatus()) \(isGranted) \(MoPub.sharedInstance().isGDPRApplicable) \(MoPub.sharedInstance().shouldShowConsentDialog)")
+        }else{
+            
+            MoPub.sharedInstance().grantConsent()
+            
+            if(withResult){
+                result(true)
+            }
+
+            
+        }
+
+           
+      
         
     }
     
@@ -77,16 +143,16 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
         let adConsent:Bool = args["adConsent"] as? Bool ?? false
         let adUnitID:String = args["adUnitID"] as? String ?? ""
 
-
+        if(adConsent){
+            self.setConsent(call: call, result: result, withResult: false)
+        }
        
         let sdkConfig = MPMoPubConfiguration(adUnitIdForAppInitialization: adUnitID )
                sdkConfig.loggingLevel = testMode ? .debug : .none
                
                MoPub.sharedInstance().initializeSdk(with: sdkConfig) {
                 
-                if(adConsent){
-                    self.consent(enabled: true)
-                }
+         
                 
                 result(true)
                
@@ -138,6 +204,15 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
             self.rewardManager.show(call: call, result: result)
             break;
 
+        case Constants.METHOD_SET_CONCENT:
+            self.setConsent(call: call, result: result)
+            break;
+            
+        case Constants.METHOD_GET_ADVERTISER_ID:
+            result("\(ASIdentifierManager.shared().advertisingIdentifier)")
+            break;
+
+            
         default:
             result(FlutterMethodNotImplemented)
         }

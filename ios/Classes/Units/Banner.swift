@@ -86,6 +86,7 @@ class AdEasyBannerAd : NSObject, FlutterPlatformView {
                 view.delegate = self
                 view.frame = CGRect(x: 0,y: 0, width: width, height: Int(size.height))
                 
+                
                 if autoRefresh { adView!.startAutomaticallyRefreshingContents() }
                 return view
             }()
