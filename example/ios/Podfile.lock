@@ -1,0 +1,42 @@
+PODS:
+  - adeasy_mopub (0.0.1):
+    - Flutter
+    - mopub-ios-sdk
+  - Flutter (1.0.0)
+  - mopub-ios-sdk (5.12.1):
+    - mopub-ios-sdk/MoPubSDK (= 5.12.1)
+  - mopub-ios-sdk/Avid (5.12.1):
+    - mopub-ios-sdk/Core
+  - mopub-ios-sdk/Core (5.12.1)
+  - mopub-ios-sdk/Moat (5.12.1):
+    - mopub-ios-sdk/Core
+  - mopub-ios-sdk/MoPubSDK (5.12.1):
+    - mopub-ios-sdk/Avid
+    - mopub-ios-sdk/Core
+    - mopub-ios-sdk/Moat
+    - mopub-ios-sdk/NativeAds
+  - mopub-ios-sdk/NativeAds (5.12.1):
+    - mopub-ios-sdk/Core
+
+DEPENDENCIES:
+  - adeasy_mopub (from `.symlinks/plugins/adeasy_mopub/ios`)
+  - Flutter (from `Flutter`)
+
+SPEC REPOS:
+  trunk:
+    - mopub-ios-sdk
+
+EXTERNAL SOURCES:
+  adeasy_mopub:
+    :path: ".symlinks/plugins/adeasy_mopub/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  adeasy_mopub: a520c972d45e6a45be1516442645679e0f0e6e55
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  mopub-ios-sdk: d1640225b34ad74700e2acddb116cac634fc45d8
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.10.1
