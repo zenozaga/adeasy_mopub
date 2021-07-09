@@ -63,6 +63,7 @@ public class SwiftAdeasyMopubPlugin:  AdEasyListener, FlutterPlugin {
         let unknow = MoPub.sharedInstance().currentConsentStatus == MPConsentStatus.unknown;
 
         
+        MoPub.sharedInstance().grantConsent()
         print("\(self.TAG) no muestre nah \(consentStatus()) \(isGranted) \(MoPub.sharedInstance().isGDPRApplicable) \(MoPub.sharedInstance().shouldShowConsentDialog)")
         
     }

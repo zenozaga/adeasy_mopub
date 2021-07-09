@@ -75,14 +75,21 @@ class AdEasyBannerAd : NSObject, FlutterPlatformView {
             let adUnitId = self.args["unitID"] as? String ?? "ad_unit_id"
             let autoRefresh = self.args["autoRefresh"] as? Bool ?? false
             let height = self.args["height"] as? NSInteger ?? 0
+            let width = self.args["width"] as? NSInteger ?? -1
+
+            let size = getBannerAdSize(height: height);
+            
             
             adView = {
                 let view: MPAdView = MPAdView(adUnitId: adUnitId)
+                view.translatesAutoresizingMaskIntoConstraints = true
                 view.delegate = self
+                view.frame = CGRect(x: 0,y: 0, width: width, height: Int(size.height))
+                
                 if autoRefresh { adView!.startAutomaticallyRefreshingContents() }
                 return view
             }()
-            adView!.loadAd(withMaxAdSize: getBannerAdSize(height: height))
+            adView!.loadAd(withMaxAdSize: size)
         }
         return adView
     }
@@ -118,7 +125,7 @@ extension AdEasyBannerAd: MPAdViewDelegate {
     func adView(_ view: MPAdView!, didFailToLoadAdWithError error: Error!) {
         var args:[String:Any] = [:]
         args["unitID"] = view.adUnitId
-        args["errorCode"] = error.localizedDescription
+        args["error"] = error.localizedDescription
         channel.invokeMethod(Constants.EVENT_FAIL, arguments: args)
     }
     
