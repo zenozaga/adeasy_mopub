@@ -20,6 +20,7 @@ class AdEasyRewardAd: NSObject {
     private var result:FlutterResult?;
     
     fileprivate var delegate: MPRewardedVideoDelegate?
+    
 
     
     init(channel:FlutterMethodChannel!) {
