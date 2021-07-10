@@ -152,6 +152,15 @@ class _AdEasyMopubWidgetState extends State<AdEasyMopubWidget> {
     size = MediaQuery.of(context).size;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Text("ID"),
+        onPressed: () async {
+
+          var id = await AdEasyMopub.instance.getAdvertiserID();
+          print(id);
+
+        },
+      ),
       appBar: AppBar(
         title: const Text('AdEasyMopub Plugin'),
       ),
@@ -247,6 +256,7 @@ class _AdEasyMopubWidgetState extends State<AdEasyMopubWidget> {
               child: CircularProgressIndicator(),
             ),
     );
+
   }
 
   @override

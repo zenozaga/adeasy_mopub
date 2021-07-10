@@ -90,6 +90,7 @@ abstract  class Listener: MoPubView.BannerAdListener, MoPubInterstitial.Intersti
                .put("label", reward.label)
                .map()
 
+
           onReward()
      }
 

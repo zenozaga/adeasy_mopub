@@ -1,14 +1,18 @@
 package com.zenozaga.adeasy_mopub
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.os.AsyncTask
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.NonNull
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.mopub.common.MoPub
-import com.mopub.common.MoPubReward
 import com.mopub.common.SdkConfiguration
 import com.mopub.common.logging.MoPubLog
-import com.mopub.common.privacy.ConsentDialogListener
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubInterstitial
 import com.mopub.mobileads.MoPubRewardedAds
@@ -20,6 +24,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.io.IOException
 
 
 /** AdeasyMopubPlugin */
@@ -309,7 +314,38 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
 
+  fun getAdvertiserID(call: MethodCall, result: Result){
 
+    val task: AsyncTask<Void?, Void?, String?> = @SuppressLint("StaticFieldLeak")
+    object : AsyncTask<Void?, Void?, String?>() {
+
+      override fun onPostExecute(advertId: String?) {
+        print(advertId ?: "")
+        result.success(advertId)
+      }
+
+      override fun doInBackground(vararg p0: Void?): String? {
+        var idInfo: AdvertisingIdClient.Info? = null
+        try {
+          idInfo = AdvertisingIdClient.getAdvertisingIdInfo(activity)
+        } catch (e: GooglePlayServicesNotAvailableException) {
+          e.printStackTrace()
+        } catch (e: GooglePlayServicesRepairableException) {
+          e.printStackTrace()
+        } catch (e: IOException) {
+          e.printStackTrace()
+        }
+        var advertId: String? = null
+        try {
+          advertId = idInfo!!.id
+        } catch (e: NullPointerException) {
+          e.printStackTrace()
+        }
+        return advertId
+      }
+    }
+    task.execute()
+  }
 
 
 
@@ -332,6 +368,8 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
   }
+
+
 
 
 
@@ -408,23 +446,9 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
         initialization(call, result)
 
       }
-      Constants.METHOD_RESUME -> {
-
-        result.success(true)
-
-      }
-      Constants.METHOD_PAUSE -> {
-
-        result.success(true)
-
-      }
-      Constants.METHOD_SET_TRACK_NETWORK -> {
-
-        result.success(true)
-
-      }
       Constants.METHOD_SET_CONCENT -> {
 
+        result.success(true)
 
       }
 
@@ -435,8 +459,7 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       Constants.METHOD_GET_ADVERTISER_ID -> {
-
-
+        getAdvertiserID(call,result)
       }
 
       Constants.METHOD_SHOW_INTERSTITIAL -> {
@@ -455,14 +478,8 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       Constants.METHOD_SHOW_REWARD -> {
         showReward(call,result)
       }
-      Constants.METHOD_LOAD_OFFERSWALL -> {
 
 
-      }
-      Constants.METHOD_SHOW_OFFERSWALL -> {
-
-
-      }
       else -> {
         result.notImplemented()
       }
