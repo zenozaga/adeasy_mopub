@@ -111,6 +111,7 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
       destroyInterstitial()
       mInterstitial = MoPubInterstitial(activity!!,unitID ?: "");
 
+
     }
 
 
@@ -123,6 +124,7 @@ class AdeasyMopubPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     setInterstitial(unitID);
 
     if(mInterstitial?.isReady == true){
+
 
       sendEvent(Constants.EVENT_LOAD,Constants.AD_TYPE_INERSTITIAL,"")
       result.success(true)

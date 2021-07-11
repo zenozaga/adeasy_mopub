@@ -157,21 +157,7 @@ class AdEasyMopub {
     return result;
   }
 
-  Future<bool> loadOfferWall([AdEasyListener? listener]) async {
-    _listener = listener;
-    var result =
-        await methodChannel.invokeMethod(Constants.METHOD_LOAD_OFFERSWALL, {});
 
-    return result;
-  }
-
-  Future<bool> showOfferWall([AdEasyListener? listener]) async {
-    _listener = listener;
-    var result =
-        await methodChannel.invokeMethod(Constants.METHOD_SHOW_OFFERSWALL, {});
-
-    return result;
-  }
 
   static AdEasyMopub get instance => _instance ??= AdEasyMopub();
 }
